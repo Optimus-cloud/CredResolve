@@ -1,6 +1,3 @@
-"""
-Generates the analysis_notebook.ipynb file from JSON structures.
-"""
 import json
 
 cells = [
