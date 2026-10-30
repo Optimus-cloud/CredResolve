@@ -1,9 +1,3 @@
-"""
-CredResolve Golden Dataset Pipeline (High-Performance Vectorized)
-Builds the clean analytical layer and audit trail from raw collections datasets.
-Preserves raw data immutability.
-"""
-
 import os
 import sys
 import sqlite3
@@ -61,9 +55,7 @@ def build_golden_dataset():
     })
     log(f"  Payments: Raw={n_pay_raw} -> Dropped={n_pay_dropped} -> Golden={n_pay_clean} (Phantom Recov = INR {phantom_recovery/1e7:.2f} Cr)")
 
-    # -------------------------------------------------------------------------
-    # 2. CALLS & DISPOSITIONS
-    # -------------------------------------------------------------------------
+    
     log("\n[2/10] Processing Calls & Call Dispositions...")
     df_calls_raw = pd.read_csv('calls.csv')
     n_calls_raw = len(df_calls_raw)
@@ -71,9 +63,8 @@ def build_golden_dataset():
     n_calls_clean = len(df_calls_clean)
     n_calls_dropped = n_calls_raw - n_calls_clean
     
-    # Vectorized Timezone normalization to IST (UTC+5:30)
-    # Dubai is UTC+4:00 -> add 1h30m to get IST
-    # UTC is UTC+0:00 -> add 5h30m to get IST
+    
+    
     ts_raw = pd.to_datetime(df_calls_clean['event_at'])
     ts_ist = ts_raw.copy()
     utc_mask = df_calls_clean['timezone'] == 'UTC'
@@ -86,21 +77,21 @@ def build_golden_dataset():
     df_calls_clean['call_hour_ist'] = df_calls_clean['event_at_ist'].dt.hour
     df_calls_clean['call_month'] = df_calls_clean['event_at_ist'].dt.to_period('M').astype(str)
     
-    # Dispositions
+    
     df_disp_raw = pd.read_csv('call_dispositions.csv')
     n_disp_raw = len(df_disp_raw)
     df_disp_clean = df_disp_raw.drop_duplicates(subset=['disposition_id'], keep='first').copy()
     
-    # Standardize disposition code: map PTP and PROMISE_TO_PAY into standard PROMISE_TO_PAY
+    
     df_disp_clean['standard_disposition'] = df_disp_clean['disposition_code'].replace({
         'PTP': 'PROMISE_TO_PAY'
     })
     
-    # Categorize RPC
+    
     rpc_codes = {'PROMISE_TO_PAY', 'PTP_BROKEN', 'CALLBACK', 'DISPUTE', 'REFUSED', 'PAID'}
     df_disp_clean['is_rpc'] = df_disp_clean['standard_disposition'].isin(rpc_codes).astype(int)
     
-    # Merge latest disposition per call
+    
     latest_disp = df_disp_clean.sort_values('event_at').groupby('call_id').last().reset_index()
     fct_calls = pd.merge(df_calls_clean, latest_disp[['call_id', 'disposition_id', 'disposition_code', 'standard_disposition', 'is_rpc']], on='call_id', how='left')
     fct_calls['is_rpc'] = fct_calls['is_rpc'].fillna(0).astype(int)
@@ -116,9 +107,7 @@ def build_golden_dataset():
     })
     log(f"  Calls: Raw={n_calls_raw} -> Dropped={n_calls_dropped} -> Golden={len(fct_calls)}")
 
-    # -------------------------------------------------------------------------
-    # 3. WHATSAPP & SMS DIGITAL EVENTS
-    # -------------------------------------------------------------------------
+    
     log("\n[3/10] Processing WhatsApp & SMS Events...")
     df_wa_raw = pd.read_csv('whatsapp_events.csv')
     n_wa_raw = len(df_wa_raw)
@@ -181,9 +170,7 @@ def build_golden_dataset():
     })
     log(f"  Field Visits: Raw={n_fv_raw} -> Golden={len(df_fv_clean)}")
 
-    # -------------------------------------------------------------------------
-    # 5. PROMISES TO PAY
-    # -------------------------------------------------------------------------
+    
     log("\n[5/10] Processing Promises to Pay...")
     df_ptp_raw = pd.read_csv('promises_to_pay.csv')
     n_ptp_raw = len(df_ptp_raw)
@@ -203,10 +190,7 @@ def build_golden_dataset():
     })
     log(f"  PTPs: Raw={n_ptp_raw} -> Golden={len(df_ptp_clean)}")
 
-    # -------------------------------------------------------------------------
-    # 6. BORROWERS (ENTITY RESOLUTION)
-    # -------------------------------------------------------------------------
-    log("\n[6/10] Processing Borrowers Entity Resolution...")
+    
     df_b_raw = pd.read_csv('borrowers.csv')
     n_b_raw = len(df_b_raw)
     df_b_dedup = df_b_raw.drop_duplicates().copy()
@@ -228,9 +212,7 @@ def build_golden_dataset():
     })
     log(f"  Borrowers: Raw={n_b_raw} -> Dedup={len(df_b_dedup)} -> Golden Entities={len(dim_borrowers)}")
 
-    # -------------------------------------------------------------------------
-    # 7. AGENTS & AGENT SESSIONS
-    # -------------------------------------------------------------------------
+    
     log("\n[7/10] Processing Agents Dimension & Sessions...")
     df_agents_raw = pd.read_csv('agents.csv')
     n_ag_raw = len(df_agents_raw)
@@ -268,9 +250,7 @@ def build_golden_dataset():
     log(f"  Agents: Raw={n_ag_raw} -> Golden Entities={len(dim_agents)}")
     log(f"  Sessions: Raw={len(df_sess_raw)} -> Golden={len(df_sess_clean)}")
 
-    # -------------------------------------------------------------------------
-    # 8. ACCOUNTS & ACCOUNT STATUS HISTORY
-    # -------------------------------------------------------------------------
+    
     log("\n[8/10] Processing Accounts Dimension & Status History...")
     df_acc_raw = pd.read_csv('accounts.csv')
     n_acc_raw = len(df_acc_raw)
@@ -293,9 +273,7 @@ def build_golden_dataset():
     })
     log(f"  Accounts: Raw={n_acc_raw} -> Golden Entities={len(dim_accounts)}")
 
-    # -------------------------------------------------------------------------
-    # 9. CAMPAIGNS & DAILY TARGETING
-    # -------------------------------------------------------------------------
+    
     log("\n[9/10] Processing Campaigns & Daily Targeting...")
     df_camp_raw = pd.read_csv('campaigns.csv')
     df_dt_raw = pd.read_csv('daily_targeting.csv')
@@ -318,9 +296,7 @@ def build_golden_dataset():
     })
     log(f"  Daily Targeting: Raw={len(df_dt_raw)} -> Golden={len(dt_with_acc)} (Invalid targets = {pct_invalid:.1f}%)")
 
-    # -------------------------------------------------------------------------
-    # 10. MULTI-TOUCH ATTRIBUTION LAYER (7-DAY WINDOW)
-    # -------------------------------------------------------------------------
+    
     log("\n[10/10] Building Golden Attribution Layer (7-Day Lookback)...")
     int_calls = fct_calls[['account_id', 'event_at_ist', 'call_id', 'standard_disposition']].copy()
     int_calls.columns = ['account_id', 'interaction_at', 'interaction_id', 'disposition']
@@ -421,20 +397,21 @@ def build_golden_dataset():
     conn = sqlite3.connect(db_path)
     
     log("\n[Loading Golden Tables into SQLite credresolve_analytics.db]...")
-    dim_borrowers.to_sql('dim_borrowers', conn, index=False)
-    dim_accounts.to_sql('dim_accounts', conn, index=False)
-    dim_agents.to_sql('dim_agents', conn, index=False)
-    df_camp_raw.to_sql('dim_campaigns', conn, index=False)
-    df_pay_clean.to_sql('fct_payments', conn, index=False)
-    fct_calls.to_sql('fct_calls', conn, index=False)
-    df_wa_clean.to_sql('fct_whatsapp_events', conn, index=False)
-    df_sms_clean.to_sql('fct_sms_events', conn, index=False)
-    df_fv_clean.to_sql('fct_field_visits', conn, index=False)
-    df_ptp_clean.to_sql('fct_promises_to_pay', conn, index=False)
-    df_sess_clean.to_sql('fct_agent_sessions', conn, index=False)
-    dt_with_acc.to_sql('fct_daily_targeting', conn, index=False)
-    golden_attribution.to_sql('fct_payment_attribution_7d', conn, index=False)
-    df_audit.to_sql('audit_cleaning_trail', conn, index=False)
+    # Convert dates to string for clean SQLite ingestion
+    dim_borrowers.astype(str).to_sql('dim_borrowers', conn, index=False)
+    dim_accounts.astype(str).to_sql('dim_accounts', conn, index=False)
+    dim_agents.astype(str).to_sql('dim_agents', conn, index=False)
+    df_camp_raw.astype(str).to_sql('dim_campaigns', conn, index=False)
+    df_pay_clean.astype(str).to_sql('fct_payments', conn, index=False)
+    fct_calls.astype(str).to_sql('fct_calls', conn, index=False)
+    df_wa_clean.astype(str).to_sql('fct_whatsapp_events', conn, index=False)
+    df_sms_clean.astype(str).to_sql('fct_sms_events', conn, index=False)
+    df_fv_clean.astype(str).to_sql('fct_field_visits', conn, index=False)
+    df_ptp_clean.astype(str).to_sql('fct_promises_to_pay', conn, index=False)
+    df_sess_clean.astype(str).to_sql('fct_agent_sessions', conn, index=False)
+    dt_with_acc.astype(str).to_sql('fct_daily_targeting', conn, index=False)
+    golden_attribution.astype(str).to_sql('fct_payment_attribution_7d', conn, index=False)
+    df_audit.astype(str).to_sql('audit_cleaning_trail', conn, index=False)
     
     cursor = conn.cursor()
     cursor.execute("CREATE INDEX idx_pay_acc ON fct_payments(account_id);")
