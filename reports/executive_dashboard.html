@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredResolve Executive Dashboard | 60-Second CEO Pulse</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #34d399;
+            --accent-red: #f87171;
+            --accent-yellow: #fbbf24;
+            --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text-main); padding: 16px; min-height: 100vh; }
+        .dashboard-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        
+        /* Header */
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+        .header h1 { font-size: 20px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+        .header .badge { background: #ef444422; color: #ef4444; border: 1px solid #ef444455; font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 600; }
+        .header .meta { font-size: 12px; color: var(--text-muted); }
+
+        /* KPI Row */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+        .kpi-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; position: relative; }
+        .kpi-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+        .kpi-value { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 4px; }
+        .kpi-sub { font-size: 11px; color: var(--text-muted); line-height: 1.3; }
+        .kpi-highlight-red { color: var(--accent-red); font-weight: 700; }
+        .kpi-highlight-green { color: var(--accent-green); font-weight: 700; }
+        .kpi-highlight-blue { color: var(--accent-blue); font-weight: 700; }
+
+        /* Main Grid */
+        .grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+        .chart-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; }
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .chart-title { font-size: 13px; font-weight: 700; color: #fff; }
+        .chart-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: #38bdf822; color: var(--accent-blue); border: 1px solid #38bdf844; }
+        .chart-container { position: relative; flex: 1; min-height: 220px; }
+
+        /* Decision Section */
+        .grid-decision { display: grid; grid-template-columns: 1fr 1.5fr; gap: 16px; }
+        .decision-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .decision-table th { text-align: left; padding: 8px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+        .decision-table td { padding: 8px; border-bottom: 1px solid #33415555; }
+        .decision-badge-rec { background: #10b98122; color: #10b981; border: 1px solid #10b98155; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 10px; }
+        .decision-badge-rej { background: #ef444422; color: #ef4444; border: 1px solid #ef444455; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; }
+
+        .takeaways { background: #1e293b; border-left: 4px solid var(--accent-green); border-radius: 4px; padding: 10px 14px; font-size: 11px; line-height: 1.5; color: #e2e8f0; }
+        .takeaways strong { color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="header">
+        <div>
+            <h1>CredResolve CEO 60-Second Command Pulse <span class="badge">AUDIT VERIFIED</span></h1>
+            <div class="meta">Scope: 7-Month Full Operations (Jan 1, 2026 – Jul 31, 2026) | Golden Dataset Layer</div>
+        </div>
+        <div style="text-align: right;">
+            <div style="font-size: 13px; font-weight: 700; color: var(--accent-yellow);">DECISION BRIEFING</div>
+            <div class="meta">Prepared for Executive Committee</div>
+        </div>
+    </div>
+
+    <!-- KPI Row -->
+    <div class="kpi-row">
+        <div class="kpi-card">
+            <div class="kpi-title">Claimed vs Real MoM Growth</div>
+            <div class="kpi-value"><span class="kpi-highlight-red">+0.28%</span> <span style="font-size: 14px; color: var(--text-muted); font-weight: 400;">(Real Daily)</span></div>
+            <div class="kpi-sub">Reported <span style="text-decoration: line-through;">+11.0%</span> is a calendar illusion: Feb (28d) to Mar (31d) day-count expansion (+10.71%).</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-title">Clean Successful Recovery</div>
+            <div class="kpi-value">₹131.56 Cr</div>
+            <div class="kpi-sub"><span class="kpi-highlight-green">₹2.59 Cr</span> duplicate phantom recovery removed. Averaging <span class="kpi-highlight-blue">₹60.4 Lakhs/day</span> (completely flat).</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-title">Targeting Capacity Wasted</div>
+            <div class="kpi-value kpi-highlight-red">74.59%</div>
+            <div class="kpi-sub">33,564 / 45,000 daily targets dispatched to inactive accounts (CLOSED, PAID, WRITEOFF).</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-title">7-Day Attributed Recovery</div>
+            <div class="kpi-value">₹26.46 Cr <span style="font-size: 14px; color: var(--text-muted); font-weight: 400;">(20.1%)</span></div>
+            <div class="kpi-sub"><span class="kpi-highlight-yellow">79.9% (₹105.1 Cr)</span> of recovery is unattributed (no preceding interaction in 7 days).</div>
+        </div>
+    </div>
+
+    <!-- Row 2: Charts -->
+    <div class="grid-2">
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">The "11% Improvement" Deconstructed: Monthly Gross vs Daily Normalized Run-Rate</div>
+                <div class="chart-badge">FLAT RUN-RATE</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="monthlyRecoveryChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">7-Day Last-Touch Recovery Attribution Share</div>
+                <div class="chart-badge">CHANNEL IMPACT</div>
+            </div>
+            <div class="chart-container">
+                <canvas id="attributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Row 3: Decision Matrix & Denominator Waste -->
+    <div class="grid-decision">
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Targeting Denominator Waste (45,000 Daily Queue)</div>
+                <div class="chart-badge" style="background: #ef444422; color: #ef4444; border-color: #ef444455;">LEAKAGE</div>
+            </div>
+            <div class="chart-container" style="min-height: 180px;">
+                <canvas id="denominatorChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-title">Where to Deploy ₹10.0 Cr: Leadership Decision Matrix</div>
+                <span class="decision-badge-rec">RECOMMENDATION: OPTION 4</span>
+            </div>
+            <table class="decision-table">
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Area</th>
+                        <th>Expected Recov. Lift</th>
+                        <th>Estimated Net ROI</th>
+                        <th>Verdict & Rationale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Telephony Infra</td>
+                        <td>₹4 - ₹6 Cr</td>
+                        <td><span style="color:var(--accent-red);">-50% (Loss)</span></td>
+                        <td><span class="decision-badge-rej">REJECT</span> Connect rate (20%) is debtor avoidance, not telco failure.</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>More Agents</td>
+                        <td>₹5 - ₹7 Cr</td>
+                        <td><span style="color:var(--accent-red);">-40% (Loss)</span></td>
+                        <td><span class="decision-badge-rej">REJECT</span> 1,000 agents already underutilized; bloats fixed overhead.</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>AI Voice Automation</td>
+                        <td>₹8 - ₹12 Cr</td>
+                        <td>0% to +20%</td>
+                        <td><span style="color:var(--accent-yellow); font-weight:600;">HOLD</span> Voice drives only 8.5% of recovery; pilot later.</td>
+                    </tr>
+                    <tr style="background: #10b98111; border-left: 3px solid #10b981;">
+                        <td><strong>4</strong></td>
+                        <td><strong>Borrower Targeting Engine</strong></td>
+                        <td><strong>₹20 - ₹28 Cr</strong></td>
+                        <td><strong style="color:var(--accent-green);">+140% Net ROI</strong></td>
+                        <td><span class="decision-badge-rec">RECOMMENDED</span> Purges 74.6% deadweight; quadruples active coverage.</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>WhatsApp / Digital</td>
+                        <td>₹12 - ₹16 Cr</td>
+                        <td>+40% Net ROI</td>
+                        <td><span style="color:var(--accent-blue); font-weight:600;">RUNNER UP</span> 10x lower unit cost; combine with Option 4 targeting.</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Field Operations</td>
+                        <td>₹2 - ₹3.5 Cr</td>
+                        <td><span style="color:var(--accent-red);">-70% (Loss)</span></td>
+                        <td><span class="decision-badge-rej">REJECT</span> Unit cost (₹350/visit) produces massive negative cashflow.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Executive Action Bar -->
+    <div class="takeaways">
+        <strong>CEO Action Mandate:</strong> 
+        1. Immediately deploy ingestion queue filters to stop dispatching 33,564 deadweight targets daily to closed/paid accounts. 
+        2. Allocate ₹10 Cr to <strong>Option 4 (Intelligent Borrower Targeting)</strong> via a phased ₹1.5 Cr Phase 1 RCT to validate uplift before enterprise rollout. 
+        3. Projected financial return: <strong>₹24.0 Cr incremental recovery</strong> (140% Net ROI, 6-month break-even).
+    </div>
+</div>
+
+<script>
+    // Chart 1: Monthly Recovery Deconstruction
+    const ctx1 = document.getElementById('monthlyRecoveryChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: ['Jan 2026', 'Feb 2026 (28d)', 'Mar 2026 (31d)', 'Apr 2026 (30d)', 'May 2026 (31d)', 'Jun 2026 (30d)', 'Jul 2026 (31d)'],
+            datasets: [
+                {
+                    label: 'Gross Recovery (₹ Cr)',
+                    data: [18.72, 17.01, 18.89, 17.51, 18.43, 17.56, 18.72],
+                    backgroundColor: '#38bdf888',
+                    borderColor: '#38bdf8',
+                    borderWidth: 1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Daily Normalized (₹ Lakhs/Day)',
+                    data: [60.4, 60.8, 60.9, 58.4, 59.4, 58.5, 60.4],
+                    type: 'line',
+                    borderColor: '#f87171',
+                    backgroundColor: '#f87171',
+                    borderWidth: 2.5,
+                    pointRadius: 4,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { type: 'linear', position: 'left', min: 14, max: 22, grid: { color: '#33415544' }, ticks: { color: '#94a3b8' } },
+                y1: { type: 'linear', position: 'right', min: 50, max: 70, grid: { drawOnChartArea: false }, ticks: { color: '#f87171' } },
+                x: { ticks: { color: '#94a3b8' }, grid: { display: false } }
+            },
+            plugins: { legend: { labels: { color: '#f8fafc', font: { size: 11 } } } }
+        }
+    });
+
+    // Chart 2: Attribution Share
+    const ctx2 = document.getElementById('attributionChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'doughnut',
+        data: {
+            labels: ['Unattributed (79.9%)', 'Voice (8.5%)', 'WhatsApp (5.3%)', 'SMS (4.2%)', 'Field (2.2%)'],
+            datasets: [{
+                data: [79.9, 8.45, 5.26, 4.18, 2.22],
+                backgroundColor: ['#64748b', '#38bdf8', '#34d399', '#fbbf24', '#f87171'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#f8fafc', font: { size: 10 } } }
+            }
+        }
+    });
+
+    // Chart 3: Denominator Waste
+    const ctx3 = document.getElementById('denominatorChart').getContext('2d');
+    new Chart(ctx3, {
+        type: 'pie',
+        data: {
+            labels: ['Active Accounts (25.4%)', 'Closed Accounts (24.9%)', 'Paid Accounts (24.9%)', 'Writeoff Accounts (24.8%)'],
+            datasets: [{
+                data: [25.41, 24.90, 24.89, 24.80],
+                backgroundColor: ['#34d399', '#f87171', '#fbbf24', '#94a3b8'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { color: '#f8fafc', font: { size: 10 } } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

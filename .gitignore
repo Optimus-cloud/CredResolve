@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Caches & temporary files
+.ipynb_checkpoints/
+*.tmp
+.DS_Store
+Thumbs.db
+scratch/
+
+# SQLite Database (reproduced in 15s via: python pipeline/build_golden_dataset.py)
+# Ignored to prevent GitHub 100MB file limit errors
+*.db

@@ -1,0 +1,13 @@
+table_name,raw_records,records_rejected,records_corrected,golden_records,cleaning_action,business_impact
+fct_payments,25500,500,14,25000,"Deduplicated on payment_id, coalesced payment_reference across 14 partial pairs, standardized date/month.","Eliminated 500 duplicate payment rows (486 exact + 14 null-reference clones), removing INR 2.59 Cr of phantom recovery."
+fct_calls,91350,1350,90000,90000,"Deduplicated on call_id, converted mixed timezones (UTC/Dubai/Kolkata) to Asia/Kolkata IST, merged call dispositions, harmonized PTP/PROMISE_TO_PAY codes.","Prevented duplicate call logging (1350 calls) and harmonized 3,904 legacy PTP codes with 3,926 PROMISE_TO_PAY codes."
+fct_whatsapp_events,60600,600,0,60000,"Deduplicated on whatsapp_event_id, standardized timestamps.",Removed 600 duplicate WhatsApp delivery records.
+fct_sms_events,45000,0,0,45000,"Verified unique sms_event_id, standardized timestamps.","Validated 45,000 SMS transmission events."
+fct_field_visits,25000,0,250,25000,"Deduplicated on visit_id, imputed 250 missing scheduled_at timestamps with event_at.","Ensured complete operational scheduling visibility for 25,000 field visit records."
+fct_promises_to_pay,18000,0,0,18000,"Standardized promise and event timestamps, created binary is_kept indicator.","Validated 18,000 promises to pay across 4 collection channels."
+dim_borrowers,30600,600,11015,11015,"Dropped 600 exact duplicates. Performed entity resolution on 11,015 unique borrower_ids taking latest updated_at record.","Resolved profile contradictions across 30,000 raw rows to produce a unique single-source-of-truth borrower dimension."
+dim_agents,30000,0,1000,1000,"Resolved 30,000 audit snapshots to 1,000 primary agent entities based on latest updated_at. Selected agent_id as master key.",Fixed agent identity fragmentation and isolated employee_code collision.
+fct_agent_sessions,15000,0,0,15000,Calculated exact productive session hours per agent.,"Quantified 78870.9 total agent productive hours across 15,000 sessions."
+dim_accounts,30000,0,30000,30000,Linked accounts with latest recorded status history to expose status discrepancies (master vs history).,Uncovered complete status divergence between core master table and event audit history.
+fct_daily_targeting,45000,0,45000,45000,"Flagged targets assigned to inactive accounts (CLOSED, PAID, WRITEOFF).","Identified that 33564 out of 45,000 targets (74.6%) were wasted on non-active accounts."
+fct_payment_attribution_7d,17534,0,17534,17534,Executed 7-day last-touch attribution. Classified payments without touches as UNATTRIBUTED.,Attributed INR 26.46 Cr to operational channels; identified INR 105.10 Cr as unattributed within the 7-day window.
